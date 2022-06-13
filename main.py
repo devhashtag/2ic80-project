@@ -3,9 +3,9 @@ from windows import ARPWindow
 import sys
 import attacks
 
-app = QApplication(sys.argv)
+# app = QApplication(sys.argv)
 
-window = ARPWindow()
-window.show()
+# window = ARPWindow()
+# window.show()
 
-app.exec()
+# app.exec()
