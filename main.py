@@ -1,23 +1,11 @@
-print('Importing libraries...')
+from PyQt6.QtWidgets import QApplication
+from windows import ARPWindow
+import sys
+import attacks
 
-from tkinter import N
-from scapy.all import get_if_list, conf
-from PyQt6.QtWidgets import QApplication, QLabel
+app = QApplication(sys.argv)
 
-class Interface:
-    def __init__(self, id, ip_address, mac_address, netmask, gateway):
-        self.id = None
-        self.ip_address = None
-        self.mac_address = None
-        self.netmask = None
-        self.gateway = None
+window = ARPWindow()
+window.show()
 
-def create_window():
-    app = QApplication([])
-    label = QLabel('Hello, world!')
-    label.show()
-    app.exec()
-
-lst = conf.ifaces
-
-print(lst)
+app.exec()
