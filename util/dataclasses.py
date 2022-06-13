@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Interface:
-    id: str
+    name: str
     ip_addr: str
     mac_addr: str
     netmask: str
