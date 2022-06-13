@@ -8,7 +8,12 @@ def find_display_name(id: str):
     If nothing is found, the given id will be returned.
     """
     for adapter in ifaddr.get_adapters():
-        if adapter.name.decode('utf-8') == id:
+        name = adapter.name
+
+        if type(name) is bytes:
+            name = name.decode('utf-8')
+
+        if name == id:
             return adapter.nice_name
 
     return id

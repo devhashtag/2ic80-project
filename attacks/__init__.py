@@ -1,1 +1,1 @@
-from .common import *
+from .common import find_interfaces

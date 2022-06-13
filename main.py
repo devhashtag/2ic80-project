@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QApplication
 from windows import ARPWindow
 import sys
-import attacks
+from attacks import find_interfaces
 
 # app = QApplication(sys.argv)
 
