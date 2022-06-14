@@ -88,7 +88,7 @@ class VictimList(QGroupBox):
         attack_figure.setStyleSheet('background-color: green;')
 
         switch = self.widgets[self.SWITCH_BUTTON] = QPushButton()
-        switch.setStyleSheet('background-color: rgba(0,0,0,0)')
+        switch.setStyleSheet('background: transparent; border: 0;')
         switch.setFixedSize(40, 40)
         switch.setIcon(QIcon('./switch.svg'))
         switch.setIconSize(QSize(32, 32))

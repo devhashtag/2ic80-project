@@ -27,7 +27,7 @@ class HostList(QGroupBox):
         refresh = QPushButton()
         refresh.setIcon(QIcon('./refresh.svg'))
         refresh.setFixedSize(QSize(44, 22))
-        refresh.setStyleSheet('background-color: rgba(0, 0, 0, 0); margin-right: 22px;')
+        refresh.setStyleSheet('background: transparent; border: 0; margin-right: 22px;')
         refresh.setIconSize(QSize(16, 16))
         refresh.pressed.connect(lambda: refresh.setIconSize(QSize(15, 15)))
         refresh.clicked.connect(lambda: refresh.setIconSize(QSize(16, 16)))
