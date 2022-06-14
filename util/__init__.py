@@ -1,3 +1,3 @@
-from .dataclasses import Interface
+from .dataclasses import Interface, Host
 from .enums import Direction
-from .methods import draw_arrow
+from .methods import draw_arrow, ip_to_int

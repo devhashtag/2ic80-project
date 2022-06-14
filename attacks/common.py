@@ -1,4 +1,5 @@
-from util import Interface
+from scapy.all import *
+from util import Interface, Host, ip_to_int
 import ifaddr
 import netifaces as ni
 
@@ -58,3 +59,16 @@ def find_interfaces():
             pass
 
     return interfaces
+
+
+def scan_hosts(interface: Interface):
+    packets = Ether() / ARP()
+    packets[Ether].dst = 'ff:ff:ff:ff:ff:ff'
+    packets[ARP].pdst = interface.subnet
+
+    responses, _ = srp(packets, iface=interface.name, timeout=10, verbose=0)
+
+    hosts = [Host(response.psrc, response.hwsrc) for _, response in responses]
+    hosts.sort(key=lambda h: ip_to_int(h.ip_addr))
+
+    return hosts

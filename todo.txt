@@ -1,0 +1,13 @@
+ARP:
+    - drag and drop between lists
+    - victim list switch button
+    - start/stop switch
+    - initial number of ARP messages
+    - interval between messages
+    - proper layout
+
+DNS:
+
+SSL-STRIP:
+
+MAIN-WINDOW:

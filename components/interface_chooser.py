@@ -1,12 +1,8 @@
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
+from attacks import find_interfaces
 from util import Interface
-
-ifs = [
-    Interface('Wi-Fi', '192.168.2.16', 'fe80::152:6ad6:87de:3ff5%12', '192.168.2.1', '255.255.255.0'),
-    Interface('Ethernet', '192.168.2.15', 'de00::152:6ad6:87de:3ff5%12', '192.168.2.1', '255.255.255.0')
-]
 
 class InterfaceChooser(QGroupBox):
     IP_DISPLAY = 'ip'
@@ -15,9 +11,11 @@ class InterfaceChooser(QGroupBox):
     GATEWAY_DISPLAY = 'gateway'
     NIC_INPUT = 'nic'
 
+    interface_changed = pyqtSignal(Interface)
+
     def __init__(self):
         super().__init__()
-        self.interfaces = ifs
+        self.interfaces = find_interfaces()
         self.widgets = { }
         self.layout = self.construct_layout()
 
@@ -28,7 +26,6 @@ class InterfaceChooser(QGroupBox):
         self.setTitle('Interface')
         self.setFixedSize(300, 175)
         
-
         nic_input = self.widgets[self.NIC_INPUT] = QComboBox()
 
         ip_display = self.widgets[self.IP_DISPLAY] = QLineEdit()
@@ -73,16 +70,19 @@ class InterfaceChooser(QGroupBox):
         return layout
 
     def setup_behavior(self):
-        self.widgets[self.NIC_INPUT].currentIndexChanged.connect(lambda _: self.update_display())
+        nic_input = self.widgets[self.NIC_INPUT]
+        nic_input.currentIndexChanged.connect(lambda _: self.interface_changed.emit(nic_input.currentData()))
+
+        self.interface_changed.connect(self.update_display)
 
     def populate_widgets(self):
         for interface in self.interfaces:
-            self.widgets[self.NIC_INPUT].addItem(interface.id, interface)
+            self.widgets[self.NIC_INPUT].addItem(interface.name, interface)
 
-    def update_display(self):
-        interface: Interface = self.widgets[self.NIC_INPUT].currentData()
+    def update_display(self, interface: Interface):
+        check_str = lambda s: s if s else '-'
 
-        self.widgets[self.IP_DISPLAY].setText(interface.ip_addr)
-        self.widgets[self.MAC_DISPLAY].setText(interface.mac_addr)
-        self.widgets[self.GATEWAY_DISPLAY].setText(interface.gateway)
-        self.widgets[self.NETMASK_DISPLAY].setText(interface.netmask)
+        self.widgets[self.IP_DISPLAY].setText(check_str(interface.ip_addr))
+        self.widgets[self.MAC_DISPLAY].setText(check_str(interface.mac_addr))
+        self.widgets[self.GATEWAY_DISPLAY].setText(check_str(interface.gateway))
+        self.widgets[self.NETMASK_DISPLAY].setText(check_str(interface.netmask))

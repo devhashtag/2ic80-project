@@ -53,3 +53,11 @@ def draw_arrow(painter, length, rotation=0.0, origin=(0,0), direction=Direction.
 
         draw_line(x, y, round(x_bot), round(y_bot))
         draw_line(x, y, round(x_top), round(y_top))
+
+def ip_to_int(ip: str):
+    total = 0
+
+    for el in ip.split('.'):
+        total = total * 2**8 + int(el)
+
+    return total
