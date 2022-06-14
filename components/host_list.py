@@ -1,9 +1,9 @@
+from .list import DragDropHostList
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from attacks import scan_hosts
 from attacks.host_scanner import HostScanner
-from util import Interface
+from util import Interface, Host
 
 class HostList(QGroupBox):
     HOST_LIST = 'hosts'
@@ -34,8 +34,11 @@ class HostList(QGroupBox):
 
         self.widgets[self.REFRESH_BUTTON] = refresh
 
-        self.widgets[self.HOST_LIST] = QListWidget()
-        self.widgets[self.HOST_LIST].setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        host_list = self.widgets[self.HOST_LIST] = DragDropHostList()
+        host_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        host_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        host_list.setAcceptDrops(True)
+        host_list.setDragDropMode(QAbstractItemView.DragDropMode.DragOnly)
 
         layout.addWidget(self.widgets[self.HOST_LIST], 0, 0)
         layout.addWidget(refresh, 0, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
@@ -73,7 +76,7 @@ class HostList(QGroupBox):
         # during the scan
         if interface == self.interface:
             for host in hosts:
-                self.widgets[self.HOST_LIST].addItem(host.ip_addr)
+                self.widgets[self.HOST_LIST].add_host(host)
 
         self.setDisabled(False)
         self.is_scanning = False

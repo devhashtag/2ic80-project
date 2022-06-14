@@ -60,7 +60,6 @@ def find_interfaces():
 
     return interfaces
 
-
 def scan_hosts(interface: Interface):
     packets = Ether() / ARP()
     packets[Ether].dst = 'ff:ff:ff:ff:ff:ff'

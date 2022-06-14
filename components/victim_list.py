@@ -1,3 +1,4 @@
+from .list import DragDropHostList
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
@@ -69,8 +70,15 @@ class VictimList(QGroupBox):
         self.setTitle('Victims')
         self.setFixedSize(500, 300)
 
-        list_l = self.widgets[self.LIST_LEFT] = QListWidget()
-        list_r = self.widgets[self.LIST_RIGHT] = QListWidget()
+        list_l = self.widgets[self.LIST_LEFT] = DragDropHostList(removable_items=True)
+        list_r = self.widgets[self.LIST_RIGHT] = DragDropHostList(removable_items=True)
+
+        list_l.setAcceptDrops(True)
+        list_l.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
+        list_l.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        list_r.setAcceptDrops(True)
+        list_r.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
+        list_r.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
 
         radio_one = self.widgets[self.RADIO_ONE] = QRadioButton('1-way poisoning')
         radio_two = self.widgets[self.RADIO_TWO] = QRadioButton('2-way poisoning')
@@ -112,3 +120,19 @@ class VictimList(QGroupBox):
 
         self.widgets[self.RADIO_ONE].pressed.connect(set_attack_mode(AttackFigure.ONE_WAY))
         self.widgets[self.RADIO_TWO].pressed.connect(set_attack_mode(AttackFigure.TWO_WAY))
+
+        self.widgets[self.SWITCH_BUTTON].clicked.connect(self.switch_items)
+
+    def switch_items(self):
+        list_l, list_r = self.widgets[self.LIST_LEFT], self.widgets[self.LIST_RIGHT]
+        left_hosts = list_l.hosts()
+        right_hosts = list_r.hosts()
+
+        self.clear()
+
+        list_l.add_hosts(right_hosts)
+        list_r.add_hosts(left_hosts)
+
+    def clear(self):
+        self.widgets[self.LIST_LEFT].clear()
+        self.widgets[self.LIST_RIGHT].clear()

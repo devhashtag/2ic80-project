@@ -15,12 +15,10 @@ class InterfaceChooser(QGroupBox):
 
     def __init__(self):
         super().__init__()
-        self.interfaces = find_interfaces()
         self.widgets = { }
         self.layout = self.construct_layout()
 
         self.setup_behavior()
-        self.populate_widgets()
 
     def construct_layout(self):
         self.setTitle('Interface')
@@ -75,8 +73,8 @@ class InterfaceChooser(QGroupBox):
 
         self.interface_changed.connect(self.update_display)
 
-    def populate_widgets(self):
-        for interface in self.interfaces:
+    def scan(self):
+        for interface in find_interfaces():
             self.widgets[self.NIC_INPUT].addItem(interface.name, interface)
 
     def update_display(self, interface: Interface):

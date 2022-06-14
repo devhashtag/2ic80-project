@@ -14,6 +14,7 @@ class ARPWindow(QWidget):
         self.layout = self.construct_layout()
 
         self.setup_behavior()
+        self.widgets[self.INTERFACE_CHOOSER].scan()
 
     def construct_layout(self):
         self.setWindowTitle('ARP attack')
@@ -33,5 +34,7 @@ class ARPWindow(QWidget):
     def setup_behavior(self):
         interfaces = self.widgets[self.INTERFACE_CHOOSER]
         hosts = self.widgets[self.HOST_LIST]
+        victims = self.widgets[self.VICTIMS]
 
         interfaces.interface_changed.connect(hosts.set_interface)
+        interfaces.interface_changed.connect(lambda _: victims.clear())
