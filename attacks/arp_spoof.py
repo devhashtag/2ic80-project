@@ -31,7 +31,7 @@ send_antidotal_packets = lambda settings: send_packets(settings, construct_antid
 def construct_poisonous_ping(me: Host, source: Host, destination: Host):
     packet = Ether() / IP() / ICMP()
     packet[Ether].src = me.mac_addr
-    packet[Ehter].dst = source.mac_addr
+    packet[Ether].dst = source.mac_addr
     packet[IP].src = destination.ip_addr
     packet[IP].dst = source.ip_addr
     # type 8 corresponds to ping request
