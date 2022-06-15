@@ -1,8 +1,8 @@
+Global:
+    - re-organize code
+
 ARP:
-    - start/stop switch
-    - setting: initial number of ARP messages
-    - setting: interval between messages
-    - proper layout
+    - Fix Scanner QThread
 
 DNS:
 
