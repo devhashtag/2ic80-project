@@ -1,7 +1,6 @@
 from PyQt6.QtCore import *
 from attacks import scan_hosts
 from util import Interface
-import time
 
 class HostScanner(QThread):
     finished = pyqtSignal(Interface, list)

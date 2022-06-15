@@ -68,7 +68,8 @@ class VictimList(QGroupBox):
 
     def construct_layout(self):
         self.setTitle('Victims')
-        self.setFixedSize(500, 300)
+        self.setFixedHeight(300)
+        # self.setFixedSize(500, 300)
 
         list_l = self.widgets[self.LIST_LEFT] = DragDropHostList(removable_items=True)
         list_r = self.widgets[self.LIST_RIGHT] = DragDropHostList(removable_items=True)
