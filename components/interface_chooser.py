@@ -84,3 +84,7 @@ class InterfaceChooser(QGroupBox):
         self.widgets[self.MAC_DISPLAY].setText(check_str(interface.mac_addr))
         self.widgets[self.GATEWAY_DISPLAY].setText(check_str(interface.gateway))
         self.widgets[self.NETMASK_DISPLAY].setText(check_str(interface.netmask))
+
+    @property
+    def selected(self):
+        return self.widgets[self.NIC_INPUT].currentData()

@@ -3,7 +3,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from attacks.host_scanner import HostScanner
-from util import Interface, Host
+from util import Interface
 
 class HostList(QGroupBox):
     HOST_LIST = 'hosts'
@@ -20,7 +20,7 @@ class HostList(QGroupBox):
 
     def construct_layout(self):
         self.setTitle('Hosts')
-        self.setFixedSize(300, 300)
+        self.setFixedWidth(300)
 
         layout = QGridLayout(self)
 

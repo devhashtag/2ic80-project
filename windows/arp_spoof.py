@@ -2,6 +2,34 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from components import HostList, VictimList, InterfaceChooser, Toggle
+from attacks import ARPAttackSettings, send_poisonous_packets, send_antidotal_packets
+
+class AttackWorker(QObject):
+    finished = pyqtSignal()
+
+    def __init__(self, settings: ARPAttackSettings):
+        super().__init__()
+        self.settings = settings
+
+    def run(self):
+        print('Attack startng')
+
+        for _ in range(self.settings.initial_packets):
+            send_poisonous_packets(self.settings)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.poison)
+        self.timer.start(self.settings.seconds_interval * 1000)
+
+    def poison(self):
+        print('poisoning...')
+        send_poisonous_packets(self.settings)
+
+    def stop(self):
+        print('Attack stopping...')
+        send_antidotal_packets(self.settings)
+        self.timer.stop()
+        self.finished.emit()
 
 class ARPWindow(QWidget):
     INTERFACE_CHOOSER = 'interface_chooser'
@@ -10,6 +38,8 @@ class ARPWindow(QWidget):
     INTERVAL_INPUT = 'interval_input'
     INITIAL_INPUT = 'initial_input'
     ACTIVATION = 'activation'
+
+    stop_attack = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -70,4 +100,40 @@ class ARPWindow(QWidget):
         interfaces.interface_changed.connect(hosts.set_interface)
         interfaces.interface_changed.connect(lambda _: victims.clear())
 
-        self.widgets[self.ACTIVATION].state_changed.connect(lambda s: print(f'Active: {s}'))
+        self.widgets[self.ACTIVATION].state_changed.connect(self.on_toggle)
+
+    def on_toggle(self, active: bool):
+        if active:
+            # create the attack
+            self.thread = QThread()
+            self.worker = AttackWorker(self.construct_attack_settings())
+            self.worker.moveToThread(self.thread)
+
+            # connect signals and slots
+            self.thread.started.connect(self.worker.run)
+            self.stop_attack.connect(self.worker.stop)
+            self.worker.finished.connect(self.worker.deleteLater)
+            self.worker.finished.connect(self.thread.quit)
+            self.thread.finished.connect(self.thread.deleteLater)
+
+            self.thread.finished.connect(lambda: self.widgets[self.ACTIVATION].setEnabled(True))
+
+            # start the attack
+            self.thread.start()
+        else:
+            # stop the attack
+            self.widgets[self.ACTIVATION].setEnabled(False)
+            self.stop_attack.emit()
+
+    def construct_attack_settings(self) -> ARPAttackSettings:
+        victims: VictimList = self.widgets[self.VICTIMS]
+
+        interface = self.widgets[self.INTERFACE_CHOOSER].selected
+        sources = victims.widgets[victims.LIST_LEFT].hosts()
+        destinations = victims.widgets[victims.LIST_RIGHT].hosts()
+        two_way = victims.widgets[victims.RADIO_TWO].isChecked()
+        initial = int(self.widgets[self.INITIAL_INPUT].text())
+        interval = int(self.widgets[self.INTERVAL_INPUT].text())
+
+        return ARPAttackSettings(interface, sources, destinations, two_way, initial, interval)
+
