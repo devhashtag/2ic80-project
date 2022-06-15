@@ -41,7 +41,7 @@ def construct_antidotal_packet(me: Host, source: Host, destination: Host):
     return packet
 
 def send_poisonous_packets(settings: ARPAttackSettings):
-    pairs = [(x, y) for x in settings.sources for y in settings.destinations]
+    pairs = [(x, y) for x in settings.sources for y in settings.destinations if x != y]
 
     for source, destination in pairs:
         sendp(
@@ -56,7 +56,7 @@ def send_poisonous_packets(settings: ARPAttackSettings):
                 verbose=0)
 
 def send_antidotal_packets(settings: ARPAttackSettings):
-    pairs = [(x, y) for x in settings.sources for y in settings.destinations]
+    pairs = [(x, y) for x in settings.sources for y in settings.destinations if x != y]
 
     for source, destination in pairs:
         sendp(
