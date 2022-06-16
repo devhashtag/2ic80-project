@@ -10,7 +10,6 @@ from attacks import (
     send_poisonous_packets,
     send_poisonous_pings,
     handle_packet)
-from util.dataclasses import Interface
 
 class AttackWorker(QObject):
     finished = pyqtSignal()
@@ -157,6 +156,7 @@ class DNSWindow(QWidget):
 
         self.widgets[self.DNS_ADD].clicked.connect(lambda: dns.insertRow(dns.rowCount()))
         self.widgets[self.DNS_DELETE].clicked.connect(self.delete_selected_dns_rows)
+        self.widgets[self.ACTIVATION].clicked.connect(self.on_toggle)
 
     def get_valid_dns_entries(self) -> list[DNSEntry]:
         dns: QTableWidget = self.widgets[self.DNS_TABLE]
