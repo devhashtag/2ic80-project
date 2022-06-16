@@ -65,6 +65,8 @@ class DNSWindow(QWidget):
     DNS_ADD = 'dns_add'
     DNS_DELETE = 'dns_delete'
 
+    stop_attack = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.widgets = { }
