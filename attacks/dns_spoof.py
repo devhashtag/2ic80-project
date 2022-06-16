@@ -1,4 +1,3 @@
-from tkinter import W
 from attacks.arp_spoof import ARPAttackSettings
 from dataclasses import dataclass
 from scapy.all import *
