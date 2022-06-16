@@ -12,7 +12,7 @@ class AttackWorker(QObject):
         self.settings = settings
 
     def run(self):
-        print('Attack startng')
+        print('Attack starting')
 
         # Ping victims to ensure they know of each others existence
         send_poisonous_pings(self.settings)
@@ -69,6 +69,7 @@ class ARPWindow(QWidget):
         initial = self.widgets[self.INITIAL_INPUT] = QLineEdit(self)
         activation = self.widgets[self.ACTIVATION] = Toggle(self, 'Stop', 'Start')
 
+        # These values are the defaults in Ettercap
         interval.setText('10')
         initial.setText('4')
 

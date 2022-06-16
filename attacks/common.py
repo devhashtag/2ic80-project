@@ -65,7 +65,7 @@ def scan_hosts(interface: Interface):
     packets[Ether].dst = 'ff:ff:ff:ff:ff:ff'
     packets[ARP].pdst = interface.subnet
 
-    responses, _ = srp(packets, iface=interface.name, timeout=10, verbose=0)
+    responses, _ = srp(packets, iface=interface.name, timeout=2, verbose=0)
 
     hosts = [Host(response.psrc, response.hwsrc) for _, response in responses]
     hosts.sort(key=lambda h: ip_to_int(h.ip_addr))
