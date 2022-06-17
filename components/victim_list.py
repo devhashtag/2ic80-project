@@ -91,7 +91,7 @@ class VictimList(QGroupBox):
         switch = self.widgets[self.SWITCH_BUTTON] = QPushButton()
         switch.setStyleSheet('background: transparent; border: 0;')
         switch.setFixedSize(40, 40)
-        switch.setIcon(QIcon('./switch.svg'))
+        switch.setIcon(QIcon('./icons/switch.svg'))
         switch.setIconSize(QSize(32, 32))
 
         switch.pressed.connect(lambda : switch.setIconSize(QSize(30, 30)))

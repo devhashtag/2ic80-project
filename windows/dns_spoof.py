@@ -10,7 +10,7 @@ from attacks import (
     send_antidotal_packets,
     send_poisonous_packets,
     send_poisonous_pings,
-    handle_packet)
+    handle_packet_dns)
 
 class AttackWorker(QObject):
     finished = pyqtSignal()
@@ -31,7 +31,7 @@ class AttackWorker(QObject):
 
         self.sniffer = AsyncSniffer(
             iface=self.settings.arp_settings.interface.name,
-            prn=lambda p: handle_packet(self.settings, p)
+            prn=lambda p: handle_packet_dns(self.settings, p)
         )
         self.sniffer.start()
 
@@ -97,14 +97,14 @@ class DNSWindow(QWidget):
         victims.setAcceptDrops(True)
         victims.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
 
-        dns_add.setIcon(QIcon('./add.svg'))
+        dns_add.setIcon(QIcon('./icons/add.svg'))
         dns_add.setFixedSize(QSize(44, 22))
         dns_add.setStyleSheet('background: transparent; border: 0; margin-right: 22px;')
         dns_add.setIconSize(QSize(16, 16))
         dns_add.pressed.connect(lambda: dns_add.setIconSize(QSize(15, 15)))
         dns_add.clicked.connect(lambda: dns_add.setIconSize(QSize(16, 16)))
 
-        dns_delete.setIcon(QIcon('./delete.svg'))
+        dns_delete.setIcon(QIcon('./icons/delete.svg'))
         dns_delete.setFixedSize(QSize(44, 44))
         dns_delete.setStyleSheet('background: transparent; border: 0; margin-top: 22px; margin-right: 22px;')
         dns_delete.setIconSize(QSize(16, 16))

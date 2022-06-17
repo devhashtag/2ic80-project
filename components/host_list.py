@@ -25,7 +25,7 @@ class HostList(QGroupBox):
         layout = QGridLayout(self)
 
         refresh = QPushButton()
-        refresh.setIcon(QIcon('./refresh.svg'))
+        refresh.setIcon(QIcon('./icons/refresh.svg'))
         refresh.setFixedSize(QSize(44, 22))
         refresh.setStyleSheet('background: transparent; border: 0; margin-right: 22px;')
         refresh.setIconSize(QSize(16, 16))

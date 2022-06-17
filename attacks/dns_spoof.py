@@ -49,7 +49,7 @@ def forward_packet(settings: ARPAttackSettings, packet: Packet):
             sendp(packet, verbose=0)
             return
 
-def handle_packet(settings: DNSAttackSettings, packet: Packet):
+def handle_packet_dns(settings: DNSAttackSettings, packet: Packet):
     """
     Inspects a packet.
 
