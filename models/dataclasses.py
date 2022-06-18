@@ -12,8 +12,8 @@ class Interface:
     @property
     def prefix_length(self) -> int:
         return bin(
-            # Converts self.ip_addr to an integer
-            reduce(lambda r, e: r*2**8 + int(e), self.ip_addr.split('.'), 0)
+            # Converts self.netmask to an integer
+            reduce(lambda r, e: r*2**8 + int(e), self.netmask.split('.'), 0)
         ).count('1')
 
     @property
@@ -33,6 +33,7 @@ class ARPAttackSettings:
     two_way: bool
     initial_packets: int
     seconds_interval: int
+    ip_forwarding: bool
 
     @property
     def me(self):

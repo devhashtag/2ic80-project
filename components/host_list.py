@@ -63,15 +63,19 @@ class HostList(QGroupBox):
         host_list = self.widgets[self.HOST_LIST]
         host_list.clear()
 
-        self._scanner = HostScanner(self.interface)
-        self._scanner.finished.connect(self.stop_scanning)
-        self._scanner.start()
+        self.thread = QThread()
+        self.worker = HostScanner(self.interface)
+        self.worker.moveToThread(self.thread)
+
+        self.worker.finished.connect(self.stop_scanning)
+        self.worker.finished.connect(lambda a,b: self.thread.quit())
+        self.worker.finished.connect(lambda a,b: self.worker.deleteLater())
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.started.connect(self.worker.run)
+
+        self.thread.start()
 
     def stop_scanning(self, interface, hosts):
-        # Join thread before removing the reference to it
-        self._scanner.wait()
-        self._scanner = None
-
         # only add the hosts if the interface has not changed
         # during the scan
         if interface == self.interface:

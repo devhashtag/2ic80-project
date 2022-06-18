@@ -40,11 +40,11 @@ class DNSAttackWorker(QObject):
     def stop(self):
         print('Attack stopping...')
 
-        self.sniffer.stop(join=True)
-
         # heal the victims' caches
         for _ in range(self.settings.arp_settings.initial_packets):
             send_antidotal_packets(self.settings.arp_settings)
+
+        self.sniffer.stop(join=True)
 
         self.timer.stop()
         self.finished.emit()
@@ -63,8 +63,6 @@ def forward_packet(settings: ARPAttackSettings, packet: Packet):
        # Don't forward packets that are sent to us
        or (packet[IP].dst == interface.ip_addr)):
         return
-
-    # print(f'Forwarding {packet.summary()}')
 
     # victim -> gateway
     for victim in victims:
