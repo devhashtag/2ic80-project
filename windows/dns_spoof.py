@@ -176,6 +176,7 @@ class DNSWindow(QWidget):
                 destinations,
                 True,
                 4,
-                10
+                10,
+                True
             ),
             self.get_valid_dns_entries())
