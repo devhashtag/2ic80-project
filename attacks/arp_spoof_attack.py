@@ -159,6 +159,6 @@ class ARPAttackWorker(QObject):
 
         if victim != None and destination != None:
             packet[Ether].src = interface.mac_addr
-            packet[Ether].dst = victim.ip_addr
+            packet[Ether].dst = victim.mac_addr
 
             sendp(packet, verbose=0)

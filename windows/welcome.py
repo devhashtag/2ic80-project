@@ -11,7 +11,7 @@ class WelcomeWindow(QWidget):
 
     def construct_layout(self):
         self.setWindowTitle('2IC80 Project')
-        self.setFixedSize(QSize(600, 500))
+        self.setFixedSize(QSize(300, 300))
 
         arp_button = QPushButton(text='ARP spoof attack')
         dns_button = QPushButton(text='DNS spoof attack')
