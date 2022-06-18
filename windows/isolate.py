@@ -65,7 +65,7 @@ class IsolateWindow(QWidget):
                 self.widgets[self.INTERFACE_CHOOSER].selected,
                 self.widgets[self.VICTIM_LIST].hosts(),
                 3,
-                1
+                300
             ))
             self.worker.moveToThread(self.thread)
 

@@ -27,7 +27,7 @@ class IsolationAttackWorker(QObject):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.send_storm)
-        self.timer.start(self.settings.response_interval * 1000)
+        self.timer.start(self.settings.response_interval)
 
     def stop(self):
         print('Attack stopping...')
@@ -43,7 +43,7 @@ class IsolationAttackWorker(QObject):
             return
 
         # Don't act upon our ARP packages
-        if packet[Ether].src == settings.interface.mac_addr:
+        if packet[Ether].src == self.settings.interface.mac_addr:
             return
 
         for victim in self.settings.victims:
