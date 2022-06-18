@@ -1,11 +1,10 @@
 from PyQt6.QtWidgets import QApplication
-from windows import ARPWindow, DNSWindow, IsolateWindow
+from windows import WelcomeWindow
 import sys
-
 
 app = QApplication(sys.argv)
 
-window = IsolateWindow()
+window = WelcomeWindow()
 window.show()
 
 app.exec()

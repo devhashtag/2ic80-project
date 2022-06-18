@@ -2,7 +2,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from scapy.all import *
-from util import ARPAttackSettings
+from util import ARPAttackSettings, Host
 
 """
 In all functions it holds that the source has to be tricked,
