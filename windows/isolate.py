@@ -3,8 +3,8 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from attacks import IsolationAttackWorker
 from components import HostList, InterfaceChooser, Toggle, DragDropHostList
+from models import IsolationAttackSettings
 from scapy.all import *
-from util import IsolationAttackSettings
 
 class IsolateWindow(QWidget):
     INTERFACE_CHOOSER = 'interface_chooser'

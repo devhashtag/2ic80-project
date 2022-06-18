@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from util.methods import ip_to_int
+from functools import reduce
 
 @dataclass
 class Interface:
@@ -11,7 +11,10 @@ class Interface:
 
     @property
     def prefix_length(self) -> int:
-        return bin(ip_to_int(self.netmask)).count('1')
+        return bin(
+            # Converts self.ip_addr to an integer
+            reduce(lambda r, e: r*2**8 + int(e), self.ip_addr.split('.'), 0)
+        ).count('1')
 
     @property
     def subnet(self) -> str:

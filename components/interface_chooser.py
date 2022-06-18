@@ -2,7 +2,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from attacks import find_interfaces
-from util import Interface
+from models import Interface
 
 class InterfaceChooser(QGroupBox):
     IP_DISPLAY = 'ip'

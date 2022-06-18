@@ -1,55 +1,9 @@
-from .list import DragDropHostList
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from math import pi
-from util import Direction, draw_arrow
-
-class AttackFigure(QWidget):
-    """Schematically displays an ARP attack
-    """
-    ONE_WAY = 'one_way'
-    TWO_WAY = 'two_way'
-
-    def __init__(self):
-        super().__init__()
-        self.attack_mode = self.TWO_WAY
-
-    def set_attack_mode(self, attack_mode: str):
-        self.attack_mode = attack_mode
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QPainter()
-        painter.begin(self)
-        painter.setPen(QPen(Qt.GlobalColor.black, 1, Qt.PenStyle.SolidLine))
-
-        size = (150, 100)
-        offset = event.rect().width() // 2 - size[0] // 2, event.rect().height() // 2 - size[1] // 2
-
-        if self.attack_mode == self.ONE_WAY:
-            self.paint_one_way(painter, offset)
-        else:
-            self.paint_two_way(painter, offset)
-
-        painter.end()
-
-    def paint_one_way(self, painter, offset=(0,0)):
-        x, y = offset
-
-        draw_arrow(painter, 150, pi, origin=(x+150, y+50))
-        draw_arrow(painter, 60, 0.1*pi, origin=(x+0, y+35))
-        draw_arrow(painter, 60, 0.9*pi, origin=(x+150, y+35), direction=Direction.BACKWARDS)
-
-        painter.drawText(QRect(x, y+5, 150, 20), Qt.AlignmentFlag.AlignCenter, 'You')
-
-    def paint_two_way(self, painter, offset=(0,0)):
-        x, y = offset
-
-        draw_arrow(painter, 50, 0, (x, y+50), Direction.BOTH)
-        draw_arrow(painter, 50, 0, (x+100, y+50), Direction.BOTH)
-
-        painter.drawText(QRect(x+50, y+40, 50, 20), Qt.AlignmentFlag.AlignCenter, 'You')
+from components.drag_drop_list import DragDropHostList
+from enum import Enum
+from math import pi, cos, sin
 
 class VictimList(QGroupBox):
     LIST_LEFT = 'list_left'
@@ -69,7 +23,6 @@ class VictimList(QGroupBox):
     def construct_layout(self):
         self.setTitle('Victims')
         self.setFixedHeight(300)
-        # self.setFixedSize(500, 300)
 
         list_l = self.widgets[self.LIST_LEFT] = DragDropHostList(removable_items=True)
         list_r = self.widgets[self.LIST_RIGHT] = DragDropHostList(removable_items=True)
@@ -137,3 +90,111 @@ class VictimList(QGroupBox):
     def clear(self):
         self.widgets[self.LIST_LEFT].clear()
         self.widgets[self.LIST_RIGHT].clear()
+
+
+class AttackFigure(QWidget):
+    """Schematically displays an ARP attack
+    """
+    ONE_WAY = 'one_way'
+    TWO_WAY = 'two_way'
+
+    class Direction(Enum):
+        """
+        Specifies in which direction
+        an arrow should point.
+        """
+        FORWARDS = 0
+        BACKWARDS = 1
+        BOTH = 3
+
+    def __init__(self):
+        super().__init__()
+        self.attack_mode = self.TWO_WAY
+
+    def set_attack_mode(self, attack_mode: str):
+        self.attack_mode = attack_mode
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter()
+        painter.begin(self)
+        painter.setPen(QPen(Qt.GlobalColor.black, 1, Qt.PenStyle.SolidLine))
+
+        size = (150, 100)
+        offset = event.rect().width() // 2 - size[0] // 2, event.rect().height() // 2 - size[1] // 2
+
+        if self.attack_mode == self.ONE_WAY:
+            self.paint_one_way(painter, offset)
+        else:
+            self.paint_two_way(painter, offset)
+
+        painter.end()
+
+    def paint_one_way(self, painter, offset=(0,0)):
+        x, y = offset
+
+        self.draw_arrow(painter, 150, pi, origin=(x+150, y+50))
+        self.draw_arrow(painter, 60, 0.1*pi, origin=(x+0, y+35))
+        self.draw_arrow(painter, 60, 0.9*pi, origin=(x+150, y+35), direction=AttackFigure.Direction.BACKWARDS)
+
+        painter.drawText(QRect(x, y+5, 150, 20), Qt.AlignmentFlag.AlignCenter, 'You')
+
+    def paint_two_way(self, painter, offset=(0,0)):
+        x, y = offset
+
+        self.draw_arrow(painter, 50, 0, (x, y+50), AttackFigure.Direction.BOTH)
+        self.draw_arrow(painter, 50, 0, (x+100, y+50), AttackFigure.Direction.BOTH)
+
+        painter.drawText(QRect(x+50, y+40, 50, 20), Qt.AlignmentFlag.AlignCenter, 'You')
+
+    def draw_arrow(self, painter, length, rotation=0.0, origin=(0,0), direction=Direction.FORWARDS):
+        """
+        Draws a horizontal arrow with the given QPainter object.
+
+        Anti-aliasing is on only if the line is not straight, because
+        it does not work well on straight lines. The function can
+        probably be turned into a recursive one, but I can't be
+        bothered to change it.
+        """
+        def draw_line(x0, y0, x1, y1):
+            """
+            Draws a line.
+
+            Anti-aliasing will be used only if the line is not straight.
+            """
+            if x0 == x1 or y0 == y1:
+                painter.drawLine(x0, y0, x1, y1)
+            else:
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                painter.drawLine(x0, y0, x1, y1)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            
+        x, y = origin
+        rotation = -rotation
+        ltr = direction == AttackFigure.Direction.FORWARDS or direction == AttackFigure.Direction.BOTH
+        rtl = direction == AttackFigure.Direction.BACKWARDS or direction == AttackFigure.Direction.BOTH
+
+        x_end = x + length * cos(rotation)
+        y_end = y + length * sin(rotation)
+
+        draw_line(x, y, round(x_end), round(y_end))
+
+        if ltr:
+            x_bot = x_end + 7 * cos(rotation - pi*3/4)
+            y_bot = y_end + 7 * sin(rotation - pi*3/4)
+
+            x_top = x_end + 7 * cos(rotation + pi*3/4)
+            y_top = y_end + 7 * sin(rotation + pi*3/4)
+
+            draw_line(round(x_end), round(y_end), round(x_bot), round(y_bot))
+            draw_line(round(x_end), round(y_end), round(x_top), round(y_top))
+
+        if rtl:
+            x_bot = x + 7 * cos(rotation - pi/4)
+            y_bot = y + 7 * sin(rotation - pi/4)
+
+            x_top = x + 7 * cos(rotation + pi/4)
+            y_top = y + 7 * sin(rotation + pi/4)
+
+            draw_line(x, y, round(x_bot), round(y_bot))
+            draw_line(x, y, round(x_top), round(y_top))

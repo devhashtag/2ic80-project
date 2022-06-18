@@ -3,7 +3,7 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from components import HostList, VictimList, InterfaceChooser, Toggle
 from attacks import ARPAttackWorker
-from util import ARPAttackSettings
+from models import ARPAttackSettings
 
 class ARPWindow(QWidget):
     INTERFACE_CHOOSER = 'interface_chooser'
@@ -18,13 +18,13 @@ class ARPWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.widgets = { }
-        self.layout = self.construct_layout()
 
+        self.construct_layout()
         self.setup_behavior()
         self.widgets[self.INTERFACE_CHOOSER].scan()
 
     def construct_layout(self):
-        self.setWindowTitle('ARP attack')
+        self.setWindowTitle('ARP spoofing attack')
         self.setFixedSize(QSize(800, 500))
 
         interface = self.widgets[self.INTERFACE_CHOOSER] = InterfaceChooser()
@@ -64,8 +64,6 @@ class ARPWindow(QWidget):
         layout = QHBoxLayout(self)
         layout.addLayout(lhs)
         layout.addLayout(rhs)
-
-        return layout
 
     def setup_behavior(self):
         interfaces = self.widgets[self.INTERFACE_CHOOSER]

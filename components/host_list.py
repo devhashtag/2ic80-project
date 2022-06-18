@@ -1,9 +1,9 @@
-from .list import DragDropHostList
+from .drag_drop_list import DragDropHostList
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 from attacks.host_scanner import HostScanner
-from util import Interface
+from models import Interface
 
 class HostList(QGroupBox):
     HOST_LIST = 'hosts'

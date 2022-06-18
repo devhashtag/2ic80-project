@@ -1,5 +1,5 @@
 from scapy.all import *
-from util import ARPAttackSettings, DNSAttackSettings, DNSEntry
+from models import ARPAttackSettings, DNSAttackSettings, DNSEntry
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *

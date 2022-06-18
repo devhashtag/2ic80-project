@@ -1,5 +1,5 @@
 from scapy.all import *
-from util import Interface, Host, ip_to_int
+from models import Interface, Host
 import ifaddr
 import netifaces as ni
 
@@ -68,6 +68,9 @@ def scan_hosts(interface: Interface):
     responses, _ = srp(packets, iface=interface.name, timeout=2, verbose=0)
 
     hosts = [Host(response.psrc, response.hwsrc) for _, response in responses]
+
+    ip_to_int = lambda ip: reduce(lambda r, e: r*2**8 + int(e), ip.split('.'), 0)
+
     hosts.sort(key=lambda h: ip_to_int(h.ip_addr))
 
     return hosts

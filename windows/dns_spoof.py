@@ -1,9 +1,9 @@
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from components import HostList, InterfaceChooser, Toggle, DragDropHostList
 from attacks import DNSAttackWorker
-from util import DNSEntry, DNSAttackSettings, ARPAttackSettings
+from components import HostList, InterfaceChooser, Toggle, DragDropHostList
+from models import DNSEntry, DNSAttackSettings, ARPAttackSettings
 
 class DNSWindow(QWidget):
     INTERFACE_CHOOSER = 'interface_chooser'
@@ -25,7 +25,7 @@ class DNSWindow(QWidget):
         self.widgets[self.INTERFACE_CHOOSER].scan()
 
     def construct_layout(self):
-        self.setWindowTitle('DNS attack')
+        self.setWindowTitle('DNS spoofing attack')
         self.setFixedSize(QSize(1000, 500))
 
         interface = self.widgets[self.INTERFACE_CHOOSER] = InterfaceChooser()
